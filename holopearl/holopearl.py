@@ -66,7 +66,7 @@ class HoloPearl(discord.Client):
 		finally:
 			return message_to_send
 
-	def process_mention(self, mention_message: discord.Message):
+	async def process_mention(self, mention_message: discord.Message):
 		await mention_message.add_reaction("👀")
 
 	async def on_ready(self):
@@ -83,7 +83,7 @@ class HoloPearl(discord.Client):
 			self._logger.debug(f"Processed command: {message.content}; sent message \"{message_to_send}\"")
 
 		elif self.user in message.mentions:
-			self.process_mention(mention_message=message)
+			await self.process_mention(mention_message=message)
 			self._logger.debug(f"Reacted to message: {message.content}")
 
 
