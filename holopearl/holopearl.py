@@ -66,7 +66,8 @@ class HoloPearl(discord.Client):
 		finally:
 			return message_to_send
 
-	async def process_mention(self, mention_message: discord.Message):
+	@staticmethod
+	async def process_mention(mention_message: discord.Message):
 		await mention_message.add_reaction("👀")
 
 	async def on_ready(self):
