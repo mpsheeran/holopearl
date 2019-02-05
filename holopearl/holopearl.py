@@ -2,21 +2,26 @@ import discord
 import logging
 from random import randint
 import datetime
-
+from collections import namedtuple
+from dateutil import parser as date_parser
 
 class HoloPearl(discord.Client):
 	def __init__(self):
 		super().__init__()
+		# TODO: abstract the token - load from file or environment variable
 		self.bot_token = "NTQwOTc5ODgxMzgzODIxMzIy.DzZFsQ.J8JGiave6VHPw8SReimxnHi3ORg"
 		self._logger = logging.getLogger('HoloPearl')
 		log_handler = logging.StreamHandler()
 		log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 		self._logger.addHandler(log_handler)
 		self._logger.setLevel("DEBUG")
+		self.next_anime_host = None
+		self.next_anime_date = None
 
 	def run(self):
 		super().run(self.bot_token)
 
+	# TODO: store suggestions somewhere besides local disk - file in S3?
 	def store_suggestion(self, suggestion_message: discord.Message) -> bool:
 		write_line = f"{suggestion_message.author} suggested: {suggestion_message.content.lstrip('!suggestion')}\n"
 		try:
@@ -27,9 +32,12 @@ class HoloPearl(discord.Client):
 
 		return True
 
+	# TODO: find a collection in which to store all possible commands
+	# TODO: have '!help' dump all possible commands
 	def process_bang_command(self, bang_message: discord.Message) -> str:
 		try:
-			command_word = bang_message.content.split(' ')[0]
+			full_command = bang_message.content.split(' ')
+			command_word = full_command[0]
 
 			if command_word == '!help':
 				message_to_send = "This is a help message."
@@ -55,6 +63,22 @@ class HoloPearl(discord.Client):
 					"You've drawn your sword in vain!"
 				]
 				message_to_send = options[randint(0, len(options) - 1)]
+			elif command_word == '!anime':
+				anime_tuple = self.get_next_anime_night()
+				if not (anime_tuple.next_anime_host or anime_tuple.next_anime_date):
+					message_to_send = f"Next anime night is unset! Please use the command `!setanime` to plan it."
+				elif not anime_tuple.next_anime_host:
+					message_to_send = f"The next anime night is scheduled for {anime_tuple.next_anime_date}; we don't know where!"
+				elif not anime_tuple.next_anime_date:
+					message_to_send = f"The next anime night is scheduled at {anime_tuple.next_anime_host.name}'s house; we don't know when!"
+				else:
+					message_to_send = f"The next anime night is scheduled for {anime_tuple.next_anime_date} at {anime_tuple.next_anime_host.name}'s house."
+			elif command_word == '!setanime':
+				next_anime_host = bang_message.mentions[0]
+				next_anime_date = date_parser.parse(full_command[1]).date()
+				self.next_anime_host = next_anime_host
+				self.next_anime_date = next_anime_date
+				message_to_send = f"OK! Set the next anime date to {next_anime_date} and the next anime host to {next_anime_host.name}"
 			else:
 				message_to_send = f"Sorry, \"{command_word}\" is not a recognized command. Try `!help` for a list of available commands."
 		except IndexError as e:
@@ -73,6 +97,28 @@ class HoloPearl(discord.Client):
 	async def on_ready(self):
 		self._logger.debug(f"Logged in as {self.user.name}:{self.user.id}")
 		self._logger.info(f"{self.user.name} is ready!")
+		# TODO: chat into a debug channel?
+
+	# TODO
+	def get_next_anime_night(self) -> namedtuple:
+		AnimeNight = namedtuple(typename="AnimeNight", field_names=["next_anime_date", "next_anime_host"])
+		# if self.next_anime_date < datetime.date.today():
+		# 	pass # TODO: maybe default to next Friday?
+
+		next_night = AnimeNight(next_anime_date= self.next_anime_date, next_anime_host= self.next_anime_host)
+		return next_night  # this CAN return None for either or both of the fields
+
+	# TODO
+	def set_next_anime_night(self, user: discord.User = None, date: datetime.date = None) -> bool:
+		if not (user or date):
+			self._logger.debug("set_next_anime_night was called with no arguments.")
+			return False
+		if user:
+			self.next_anime_host = user
+		if date:
+			self.next_anime_date = date
+
+		return True
 
 	async def on_message(self, message):
 		if message.author == self.user:
