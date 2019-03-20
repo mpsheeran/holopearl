@@ -1,16 +1,24 @@
-import discord
 import logging
 from random import randint
 import datetime
 from collections import namedtuple
 from dateutil import parser as date_parser
 
+import discord
+
+from config import holoconfig
+
 
 class HoloPearl(discord.Client):
-	def __init__(self):
+	def __init__(self, environment="dev"):
 		super().__init__()
-		# TODO: abstract the token - load from file or environment variable
-		self.bot_token = "NTQwOTc5ODgxMzgzODIxMzIy.DzZFsQ.J8JGiave6VHPw8SReimxnHi3ORg"
+
+		if environment == 'dev':
+			self.config = holoconfig.DevelopmentConfig()
+		elif environment == 'prod':
+			self.config = holoconfig.ProductionConfig()
+
+		self.bot_token = self.config.DISCORD_BOT_KEY
 		self._logger = logging.getLogger('HoloPearl')
 		log_handler = logging.StreamHandler()
 		log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
