@@ -5,6 +5,7 @@ import datetime
 from collections import namedtuple
 from dateutil import parser as date_parser
 
+
 class HoloPearl(discord.Client):
 	def __init__(self):
 		super().__init__()
@@ -14,7 +15,7 @@ class HoloPearl(discord.Client):
 		log_handler = logging.StreamHandler()
 		log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 		self._logger.addHandler(log_handler)
-		self._logger.setLevel("DEBUG")
+		self._logger.setLevel("DEBUG") # TODO: make this configurable
 		self.next_anime_host = None
 		self.next_anime_date = None
 
