@@ -1,20 +1,40 @@
-import discord
 import logging
 from random import randint
 import datetime
 from collections import namedtuple
 from dateutil import parser as date_parser
+from importlib import reload
+
+import discord
+
+# import holopearl.command  # TODO: put commands here
+from holopearl import exception
+import config
+
 
 class HoloPearl(discord.Client):
-	def __init__(self):
+	def __init__(self, environment="dev"):
 		super().__init__()
-		# TODO: abstract the token - load from file or environment variable
-		self.bot_token = "NTQwOTc5ODgxMzgzODIxMzIy.DzZFsQ.J8JGiave6VHPw8SReimxnHi3ORg"
+		reload(config)
+
+		if environment == 'dev':
+			self.config = config.DevelopmentConfig()
+		elif environment == 'prod':
+			self.config = config.ProductionConfig()
+
+		if self.config.DISCORD_BOT_KEY:
+			if self.config.DISCORD_BOT_KEY.endswith("TOKEN_GOES_HERE"):
+				raise exception.HoloError("Bot key not updated from default value.")
+			else:
+				self.bot_token = self.config.DISCORD_BOT_KEY
+		else:
+			raise exception.HoloError("Bot key blank or missing from configuration file.")
+
 		self._logger = logging.getLogger('HoloPearl')
 		log_handler = logging.StreamHandler()
 		log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 		self._logger.addHandler(log_handler)
-		self._logger.setLevel("DEBUG")
+		self._logger.setLevel(self.config.LOG_LEVEL)
 		self.next_anime_host = None
 		self.next_anime_date = None
 
