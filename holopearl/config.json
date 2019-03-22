@@ -1,0 +1,10 @@
+{
+  "dev": {
+    "DISCORD_BOT_KEY": "NTQwOTc5ODgxMzgzODIxMzIy.DzZFsQ.J8JGiave6VHPw8SReimxnHi3ORg",
+    "LOG_LEVEL": "DEBUG"
+  },
+  "prod": {
+    "DISCORD_BOT_KEY": "NTQwOTc5ODgxMzgzODIxMzIy.DzZFsQ.J8JGiave6VHPw8SReimxnHi3ORg",
+    "LOG_LEVEL": "INFO"
+  }
+}
