@@ -4,7 +4,7 @@ a Discord bot by @misterHaderach
 
 #### Requirements
 
-- Python3.7+
+- Python3.8+
 - pip
 - a [Discord bot token](https://discordapp.com/developers/docs/topics/oauth2#bots)
 - Docker (Optional) 
