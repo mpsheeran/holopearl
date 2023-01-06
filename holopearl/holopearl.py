@@ -10,25 +10,26 @@ import discord
 # import holopearl.command  # TODO: put commands here
 from holopearl import exception
 import config
+from os import getenv
 
 
 class HoloPearl(discord.Client):
-	def __init__(self, environment="dev"):
-		super().__init__()
+	def __init__(self, bot_environment="dev"):
+		intents = discord.Intents.default()
+		super().__init__(intents=intents)
 		reload(config)
 
-		if environment == 'dev':
+		if bot_environment == 'dev':
 			self.config = config.DevelopmentConfig()
-		elif environment == 'prod':
+		elif bot_environment == 'prod':
 			self.config = config.ProductionConfig()
 
-		if self.config.DISCORD_BOT_KEY:
-			if self.config.DISCORD_BOT_KEY.endswith("TOKEN_GOES_HERE"):
-				raise exception.HoloError("Bot key not updated from default value.")
-			else:
-				self.bot_token = self.config.DISCORD_BOT_KEY
+		env_bot_token = getenv(key="HOLOPEARL_BOT_TOKEN")
+		if env_bot_token:
+			self.bot_token = env_bot_token
+
 		else:
-			raise exception.HoloError("Bot key blank or missing from configuration file.")
+			raise exception.HoloError("Bot token not supplied as environment variable.")
 
 		self._logger = logging.getLogger('HoloPearl')
 		log_handler = logging.StreamHandler()
