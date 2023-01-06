@@ -1,2 +1,3 @@
--e git+https://github.com/Rapptz/discord.py#egg=discord.py[voice]
+discord.py
 python-dateutil
+yt-dlp
