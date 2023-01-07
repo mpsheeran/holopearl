@@ -1,4 +1,5 @@
-FROM python:3.8
+FROM python:3.9
+VOLUME /holodata
 COPY . /app
 RUN pip3 install -r /app/pip-requirements.txt
-CMD ["python3", "/app", "prod"]
+CMD ["python3.9", "/app", "prod"]

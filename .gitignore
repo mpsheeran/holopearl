@@ -67,3 +67,6 @@ config.py
 
 # VScode
 .idea/
+
+# Custom
+holopearl_token

@@ -1,25 +1,16 @@
-from holopearl.exception import HoloError
-from config import BaseConfig
+from yt_dlp import YoutubeDL
 
+def find_urls_in_string(string_to_parse: str) -> list:
+    return [
+        i for i 
+        in string_to_parse.split() 
+        if i.startswith("https:") or i.startswith("http:")
+    ]
 
-class InitialSetup:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def insert_token():
-        import os
-        token = os.getenv('HOLOPEARL_BOT_TOKEN')
-        config_path = f"{BaseConfig.ROOT_DIR}/config.py"
-        print(f"Token: {token}")
-        if token:
-            with open(config_path, 'r') as config_file:
-                config_data = config_file.read()
-
-            config_data = config_data.replace('PROD_TOKEN_GOES_HERE', token)
-
-            with open(config_path, 'w') as config_file:
-                config_file.write(config_data)
-
-        else:
-            raise HoloError("'HOLOPEARL_BOT_TOKEN' environment variable not set; exiting.")
+def yt_download(urls: list, file_path: str = None):
+    if file_path:
+        with YoutubeDL({'paths':{'home':file_path}}) as ydl:
+            ydl.download(urls)
+    else:
+        with YoutubeDL() as ydl:
+            ydl.download(urls)
