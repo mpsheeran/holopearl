@@ -1,13 +1,17 @@
 import discord
-import os
+import asyncio
+
 from discord.ext import commands
 from random import choice
+from concurrent.futures import ProcessPoolExecutor
+
 import holopearl.helpers
 
 class HoloPearlCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
+        self.loop = asyncio.get_event_loop()
 
     @commands.command()
     async def hello(self, ctx, *, member: discord.Member = None):
@@ -42,9 +46,15 @@ class HoloPearlCommands(commands.Cog):
     @commands.command()
     async def download(self, ctx):
         """Download a video"""
-        from yt_dlp import YoutubeDL
-        urls = holopearl.helpers.find_urls_in_string(ctx.message.content)
-        # urls = ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
-        with YoutubeDL() as ydl:
-            ydl.download(urls)
-        await ctx.send(f"Downloaded the following videos: {urls}")
+        urls = holopearl.helpers.find_urls_in_string(string_to_parse=ctx.message.content)
+        if urls:
+            await ctx.send(f"Downloading videos.")
+            await self.ytdlp_loop(urls=urls)
+        else:
+            await ctx.send(f"I couldn't find any URLs in your message :C")
+
+    async def ytdlp_loop(self, urls: list):
+        executor = ProcessPoolExecutor(max_workers=1)
+        await self.loop.run_in_executor(
+                executor, holopearl.helpers.yt_download, urls, self.bot.base_path
+            )

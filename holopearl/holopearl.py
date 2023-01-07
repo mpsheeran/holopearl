@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 from importlib import reload
-from os import getenv
+import os
 
 import discord
 from discord.ext import commands
@@ -23,7 +23,7 @@ class HoloPearl(commands.Bot):
         elif bot_environment == 'prod':
             self.config = config.ProductionConfig()
 
-        env_bot_token = getenv(key="HOLOPEARL_BOT_TOKEN")
+        env_bot_token = os.getenv(key="HOLOPEARL_BOT_TOKEN")
         if env_bot_token:
             self.bot_token = env_bot_token
 
@@ -37,6 +37,7 @@ class HoloPearl(commands.Bot):
         self._logger.setLevel(self.config.LOG_LEVEL)
         self.next_anime_host = None
         self.next_anime_date = None
+        self.base_path = "/holodata"
 
     def run(self):
         super().run(self.bot_token)
@@ -44,8 +45,9 @@ class HoloPearl(commands.Bot):
     # TODO: store suggestions somewhere besides local disk - file in S3?
     def store_suggestion(self, suggestion_message: discord.Message) -> bool:
         write_line = f"{suggestion_message.author} suggested: {suggestion_message.content.lstrip('!suggestion')}\n"
+        filepath = os.path.join(self.base_path, 'suggestions.txt')
         try:
-            with open('suggestions.txt', 'a+') as suggestion_file:
+            with open(filepath, 'a+') as suggestion_file:
                 suggestion_file.write(write_line)
         except IOError as e:
             return False
