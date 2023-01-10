@@ -50,5 +50,7 @@ pipelines:
             - IMAGE=${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}
             - docker tag "${IMAGE_NAME}" "${DOCKERHUB_USERNAME}${IMAGE}:${VERSION}"
             - docker push "${DOCKERHUB_USERNAME}${IMAGE}:${VERSION}"
+            - docker tag "${IMAGE_NAME}" "${DOCKERHUB_USERNAME}${IMAGE}:latest"
+            - docker push "${DOCKERHUB_USERNAME}${IMAGE}:latest"            
           services:
             - docker
