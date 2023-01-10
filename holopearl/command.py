@@ -57,10 +57,13 @@ class HoloPearlCommands(commands.Cog):
 
     @commands.command()
     async def download(self, ctx):
-        """Download a video"""
+        """Download a video!"""
         urls = holopearl.helpers.find_urls_in_string(string_to_parse=ctx.message.content)
         if urls:
-            await ctx.send(f"Downloading videos.")
+            if len(urls) > 1:
+                await ctx.send(f"Downloading videos...")
+            else:
+                await ctx.send(f"Downloading video...")
             await self.ytdlp_loop(urls=urls)
         else:
             await ctx.send(f"I couldn't find any URLs in your message :C")
