@@ -1,3 +1,4 @@
 discord.py
 python-dateutil
 yt-dlp
+qrcode[pil]

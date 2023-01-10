@@ -1,7 +1,10 @@
 import discord
 import asyncio
+import qrcode
 
+from discord import File
 from discord.ext import commands
+from io import BytesIO
 from random import choice
 from concurrent.futures import ProcessPoolExecutor
 
@@ -42,6 +45,15 @@ class HoloPearlCommands(commands.Cog):
             "You've drawn your sword in vain!"
         ]
         await ctx.send(choice(options))
+
+    @commands.command()
+    async def qrcode(self, ctx):
+        """Create a QR Code from a string of text!"""
+        qr_obj = qrcode.make(ctx.message.content.replace("!qrcode ",""))
+        with BytesIO() as image_binary:
+            qr_obj.save(image_binary)
+            image_binary.seek(0)
+            await ctx.send(file=File(fp=image_binary, filename="image.png"))
 
     @commands.command()
     async def download(self, ctx):
