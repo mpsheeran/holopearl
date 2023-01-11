@@ -54,6 +54,9 @@ class HoloPearl(commands.Bot):
 
         return True
 
+    async def on_command_error(self, context, exception) -> None:
+        await context.send("Oops. That didn't work. Please see !help for information on command usage.")
+
     #broken
     @staticmethod
     async def process_mention(mention_message: discord.Message):
