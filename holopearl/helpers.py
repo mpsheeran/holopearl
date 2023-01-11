@@ -7,10 +7,13 @@ def find_urls_in_string(string_to_parse: str) -> list:
         if i.startswith("https:") or i.startswith("http:")
     ]
 
-def yt_download(urls: list, file_path: str = None):
+def yt_download(urls: list, file_path: str = None, progress_hooks: list = None):
+    settings_dict = {}
     if file_path:
-        with YoutubeDL({'paths':{'home':file_path}}) as ydl:
-            ydl.download(urls)
-    else:
-        with YoutubeDL() as ydl:
-            ydl.download(urls)
+        settings_dict['paths'] = {'home': file_path}
+
+    if progress_hooks:
+        settings_dict['progress_hooks'] = progress_hooks
+
+    with YoutubeDL(settings_dict) as ydl:
+        ydl.download(urls)

@@ -7,16 +7,13 @@ import discord
 from discord.ext import commands
 
 from holopearl.command import HoloPearlCommands
-from holopearl import exception
+from holopearl.exception import HoloError
 import config
 
 class HoloPearl(commands.Bot):
     def __init__(self, bot_environment="dev"):
         intents = discord.Intents.default()
         intents.message_content = True
-
-        super().__init__(intents=intents, command_prefix='!')
-        reload(config)
 
         if bot_environment == 'dev':
             self.config = config.DevelopmentConfig()
@@ -26,18 +23,20 @@ class HoloPearl(commands.Bot):
         env_bot_token = os.getenv(key="HOLOPEARL_BOT_TOKEN")
         if env_bot_token:
             self.bot_token = env_bot_token
-
         else:
-            raise exception.HoloError("Bot token not supplied as environment variable.")
+            raise HoloError("Bot token not supplied as environment variable.")
 
         self._logger = logging.getLogger('HoloPearl')
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         self._logger.addHandler(log_handler)
         self._logger.setLevel(self.config.LOG_LEVEL)
+
         self.next_anime_host = None
         self.next_anime_date = None
         self.base_path = "/holodata"
+
+        super().__init__(intents=intents, command_prefix=self.config.COMMAND_PREFIX)
 
     def run(self):
         super().run(self.bot_token)
@@ -54,13 +53,18 @@ class HoloPearl(commands.Bot):
 
         return True
 
-    async def on_command_error(self, context, exception) -> None:
-        await context.send("Oops. That didn't work. Please see !help for information on command usage.")
+    async def on_command_error(self, context, exception: BaseException) -> None:
+        self._logger.error(exception)
+        await context.reply(f"Oops. That didn't work. Please see {self.config.COMMAND_PREFIX}help for information on command usage.")
+        raise exception
 
-    #broken
-    @staticmethod
-    async def process_mention(mention_message: discord.Message):
-        await mention_message.add_reaction("👀")
+
+
+    async def on_message(self, context: discord.Message):
+        if not context.author == self.user:
+            if self.user in context.mentions:
+                await context.add_reaction("👀")
+        await self.process_commands(context)
 
     async def on_ready(self):
         self._logger.debug(f"Logged in as {self.user.name}:{self.user.id}")
