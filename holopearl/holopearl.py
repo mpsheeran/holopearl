@@ -1,6 +1,4 @@
 import logging
-from collections import namedtuple
-from importlib import reload
 import os
 
 import discord
@@ -26,7 +24,11 @@ class HoloPearl(commands.Bot):
         else:
             raise HoloError("Bot token not supplied as environment variable.")
 
-        self._logger = logging.getLogger('HoloPearl')
+        if self.config.LOG_ROOT:
+            self._logger = logging.getLogger()
+        else:
+            self._logger = logging.getLogger('HoloPearl')
+
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         self._logger.addHandler(log_handler)
@@ -35,8 +37,8 @@ class HoloPearl(commands.Bot):
         self.next_anime_host = None
         self.next_anime_date = None
         self.base_path = "/holodata"
-
         super().__init__(intents=intents, command_prefix=self.config.COMMAND_PREFIX)
+        self.add_listener(self.command_completion, 'on_command_completion')
 
     def run(self):
         super().run(self.bot_token)
@@ -58,8 +60,6 @@ class HoloPearl(commands.Bot):
         await context.reply(f"Oops. That didn't work. Please see {self.config.COMMAND_PREFIX}help for information on command usage.")
         raise exception
 
-
-
     async def on_message(self, context: discord.Message):
         if not context.author == self.user:
             if self.user in context.mentions:
@@ -74,3 +74,10 @@ class HoloPearl(commands.Bot):
 
         self._logger.info(f"Loaded Cogs!")
         self._logger.debug(f"Available commands:\n{[command.name for command in self.commands]}")
+
+    async def command_completion(self, ctx: commands.Context):
+        if ctx.command.name == 'download':
+            await ctx.message.remove_reaction("👀", member=self.user)
+            await ctx.message.add_reaction("✔️")
+        else:
+            pass

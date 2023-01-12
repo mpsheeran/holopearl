@@ -6,7 +6,6 @@ from discord import File
 from discord.ext import commands
 from io import BytesIO
 from random import choice
-from concurrent.futures import ProcessPoolExecutor, Future
 from functools import partial
 
 import holopearl.helpers
@@ -60,27 +59,14 @@ class HoloPearlCommands(commands.Cog):
     @commands.max_concurrency(number=1, per=commands.BucketType(1), wait=True)
     async def download(self, ctx: commands.Context):
         """Download a video!"""
+        await ctx.message.add_reaction("👀")
         urls = holopearl.helpers.find_urls_in_string(string_to_parse=ctx.message.content)
         if urls:
-            if len(urls) > 1:
-                await ctx.send(f"Downloading videos...")
-            else:
-                await ctx.send(f"Downloading video...")
-            await self.ytdlp_loop(urls=urls, ctx=ctx)
+            exec_func = partial(
+                holopearl.helpers.yt_download,
+                urls, self.bot.base_path,
+            )
+            await asyncio.to_thread(exec_func)
         else:
             await ctx.send(f"I couldn't find any URLs in your message :C")
-
-    async def ytdlp_loop(self, urls: list, ctx: commands.Context):
-        exec_func = partial(
-            holopearl.helpers.yt_download,
-            urls, self.bot.base_path,
-        )
-        await asyncio.to_thread(
-                exec_func
-        )
-
-    async def ytdlp_progress_hook(self, ctx: commands.Context, response: dict):
-        if response["status"] == "finished":
-            await ctx.reply(f"Download complete!")
-        elif response["status"] == "error":
-            await ctx.reply(f"Download errored! Sorry!")
+            await ctx.message.remove_reaction("👀", self.bot.user)

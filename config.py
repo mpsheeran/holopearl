@@ -7,6 +7,7 @@ class BaseConfig:
 
 class DevelopmentConfig(BaseConfig):
     LOG_LEVEL = 'DEBUG'
+    LOG_ROOT = True
     COMMAND_PREFIX = '$'
 
 
