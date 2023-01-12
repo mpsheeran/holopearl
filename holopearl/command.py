@@ -61,10 +61,11 @@ class HoloPearlCommands(commands.Cog):
         """Download a video!"""
         await ctx.message.add_reaction("👀")
         urls = holopearl.helpers.find_urls_in_string(string_to_parse=ctx.message.content)
+        quiet = (self.bot.config.LOG_LEVEL != "DEBUG")
         if urls:
             exec_func = partial(
                 holopearl.helpers.yt_download,
-                urls, self.bot.base_path,
+                urls, self.bot.base_path, quiet
             )
             await asyncio.to_thread(exec_func)
         else:
