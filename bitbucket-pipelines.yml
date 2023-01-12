@@ -13,6 +13,9 @@ pipelines:
     - parallel:
         - step:
             name: Build and Test
+            runs-on:
+            - self.hosted
+            - linux
             script:
               - IMAGE_NAME=$BITBUCKET_REPO_SLUG
               - docker build . --file Dockerfile --tag ${IMAGE_NAME}
@@ -29,6 +32,9 @@ pipelines:
     master:
       - step:
           name: Build and Test
+          runs-on:
+            - self.hosted
+            - linux
           script:
             - IMAGE_NAME=$BITBUCKET_REPO_SLUG
             - docker build . --file Dockerfile --tag ${IMAGE_NAME}
@@ -41,6 +47,9 @@ pipelines:
             - "*.tar"
       - step:
           name: Deploy to Production
+          runs-on:
+            - self.hosted
+            - linux
           deployment: Production
           script:
             - echo ${DOCKERHUB_PASSWORD} | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
