@@ -2,6 +2,7 @@
 class BaseConfig:
     import os
     LOG_LEVEL = 'INFO'
+    LOG_ROOT = False
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # This is your Project Root
 
 
