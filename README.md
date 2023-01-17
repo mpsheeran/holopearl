@@ -4,7 +4,7 @@ a Discord bot by @misterHaderach
 
 #### Requirements
 
-- Python3.8+
+- Python3.9+
 - pip
 - a [Discord bot token](https://discordapp.com/developers/docs/topics/oauth2#bots)
 - Docker (Optional) 
@@ -50,7 +50,18 @@ These instructions assume you already have Docker configured and running on your
 
 #### Capabilities
 
-- TBD
+- !qrcode
+    - creates a QR code based on your input text
+
+- !download
+    - uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) to download a video file. This currently downloads to the `/holodata` directory wherever Holopearl is running. For docker, this is a volume you can map to the Docker host by adding `-v holodata:/$DIRECTORY` to the `run` command.
+- !challenge
+    - challenge Holopearl to a duel
+- !suggestion
+    - Holopearl will keep track of suggestions you have!
+    - note: there is no way to access these suggestions currently.
+- !hello
+    - say hi to Holopearl.
 
 #### FAQs
 
